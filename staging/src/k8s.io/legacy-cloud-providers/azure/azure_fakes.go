@@ -774,6 +774,8 @@ func GetTestCloud(ctrl *gomock.Controller) (az *Cloud) {
 			RouteTableResourceGroup:      "rg",
 			SecurityGroupResourceGroup:   "rg",
 			Location:                     "westus",
+			ExtendedLocationName:         "losangeles",
+			ExtendedLocationType:         "edgeZone",
 			VnetName:                     "vnet",
 			SubnetName:                   "subnet",
 			SecurityGroupName:            "nsg",
