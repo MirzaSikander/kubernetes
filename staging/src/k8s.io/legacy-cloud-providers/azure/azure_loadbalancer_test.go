@@ -689,12 +689,8 @@ func TestGetServiceLoadBalancer(t *testing.T) {
 			desc:    "getServiceLoadBalancer shall create a new lb otherwise",
 			service: getTestService("test1", v1.ProtocolTCP, nil, false, 80),
 			expectedLB: &network.LoadBalancer{
-				Name:     to.StringPtr("testCluster"),
-				Location: to.StringPtr("westus"),
-				ExtendedLocation: &network.ExtendedLocation{
-					Name: to.StringPtr("losangeles"),
-					Type: to.StringPtr("edgeZone"),
-				},
+				Name:                         to.StringPtr("testCluster"),
+				Location:                     to.StringPtr("westus"),
 				LoadBalancerPropertiesFormat: &network.LoadBalancerPropertiesFormat{},
 			},
 			expectedExists: false,
@@ -723,6 +719,32 @@ func TestGetServiceLoadBalancer(t *testing.T) {
 		assert.Equal(t, test.expectedExists, exists, "TestCase[%d]: %s", i, test.desc)
 		assert.Equal(t, test.expectedError, err != nil, "TestCase[%d]: %s", i, test.desc)
 	}
+}
+
+func TestGetServiceLoadBalancerWithExtendedLocation(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	az := GetTestCloud(ctrl)
+	az.Config.ExtendedLocationName = "losangeles"
+	az.Config.ExtendedLocationType = "edgeZone"
+	clusterResources := getClusterResources(az, 3, 3)
+	service := getTestService("test1", v1.ProtocolTCP, nil, false, 80)
+	lb, _, exists, err := az.getServiceLoadBalancer(&service, testClusterName,
+		clusterResources.nodes, false)
+
+	expectedLb := &network.LoadBalancer{
+		Name:     to.StringPtr("testCluster"),
+		Location: to.StringPtr("westus"),
+		ExtendedLocation: &network.ExtendedLocation{
+			Name: to.StringPtr("losangeles"),
+			Type: to.StringPtr("edgeZone"),
+		},
+		LoadBalancerPropertiesFormat: &network.LoadBalancerPropertiesFormat{},
+	}
+
+	assert.Equal(t, expectedLb, lb)
+	assert.False(t, exists)
+	assert.Nil(t, err)
 }
 
 func TestIsFrontendIPChanged(t *testing.T) {
@@ -2091,11 +2113,7 @@ func TestEnsurePublicIPExists(t *testing.T) {
 				ID: to.StringPtr("/subscriptions/subscription/resourceGroups/rg" +
 					"/providers/Microsoft.Network/publicIPAddresses/pip1"),
 				Location: to.StringPtr("westus"),
-				ExtendedLocation: &network.ExtendedLocation{
-					Name: to.StringPtr("losangeles"),
-					Type: to.StringPtr("edgeZone"),
-				}},
-			},
+			}},
 		},
 		{
 			desc:                    "ensurePublicIPExists shall update existed PIP's dns label",
@@ -2210,6 +2228,30 @@ func TestEnsurePublicIPExists(t *testing.T) {
 		}
 		assert.Equal(t, test.expectedError, err != nil, "TestCase[%d]: %s", i, test.desc)
 	}
+}
+
+func TestEnsurePublicIPExistsWithExtendedLocation(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	az := GetTestCloud(ctrl)
+	az.Config.ExtendedLocationName = "losangeles"
+	az.Config.ExtendedLocationType = "edgeZone"
+
+	service := getTestService("test1", v1.ProtocolTCP, nil, false, 80)
+	pip, err := az.ensurePublicIPExists(&service, "pip1", "", "", false, false)
+	expectedPip := &network.PublicIPAddress{
+		Name: to.StringPtr("pip1"),
+		ID: to.StringPtr("/subscriptions/subscription/resourceGroups/rg" +
+			"/providers/Microsoft.Network/publicIPAddresses/pip1"),
+		Location: to.StringPtr("westus"),
+		ExtendedLocation: &network.ExtendedLocation{
+			Name: to.StringPtr("losangeles"),
+			Type: to.StringPtr("edgeZone"),
+		},
+	}
+
+	assert.Equal(t, expectedPip.ExtendedLocation, pip.ExtendedLocation)
+	assert.Nil(t, err)
 }
 
 func TestShouldUpdateLoadBalancer(t *testing.T) {
