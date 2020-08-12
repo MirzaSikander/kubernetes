@@ -18499,6 +18499,9 @@ func (lb LoadBalancer) MarshalJSON() ([]byte, error) {
 	if lb.Tags != nil {
 		objectMap["tags"] = lb.Tags
 	}
+	if lb.ExtendedLocation != nil {
+		objectMap["extendedLocation"] = lb.ExtendedLocation
+	}
 	return json.Marshal(objectMap)
 }
 
@@ -18582,6 +18585,15 @@ func (lb *LoadBalancer) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				lb.Tags = tags
+			}
+		case "extendedLocation":
+			if v != nil {
+				var extendedLocation ExtendedLocation
+				err = json.Unmarshal(*v, &extendedLocation)
+				if err != nil {
+					return err
+				}
+				lb.ExtendedLocation = &extendedLocation
 			}
 		}
 	}
@@ -23974,6 +23986,9 @@ func (pia PublicIPAddress) MarshalJSON() ([]byte, error) {
 	if pia.Tags != nil {
 		objectMap["tags"] = pia.Tags
 	}
+	if pia.ExtendedLocation != nil {
+		objectMap["extendedLocation"] = pia.ExtendedLocation
+	}
 	return json.Marshal(objectMap)
 }
 
@@ -24066,6 +24081,15 @@ func (pia *PublicIPAddress) UnmarshalJSON(body []byte) error {
 					return err
 				}
 				pia.Tags = tags
+			}
+		case "extendedLocation":
+			if v != nil {
+				var extendedLocation ExtendedLocation
+				err = json.Unmarshal(*v, &extendedLocation)
+				if err != nil {
+					return err
+				}
+				pia.ExtendedLocation = &extendedLocation
 			}
 		}
 	}
