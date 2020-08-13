@@ -20,6 +20,7 @@ package azure
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"reflect"
@@ -589,6 +590,11 @@ func (az *Cloud) ensurePublicIPExists(service *v1.Service, pipName string, domai
 	klog.V(2).Infof("ensurePublicIPExists for service(%s): pip(%s) - creating", serviceName, *pip.Name)
 
 	klog.V(10).Infof("CreateOrUpdatePIP(%s, %q): start", pipResourceGroup, *pip.Name)
+
+	// TODO: Remove
+	bytes, _ := json.Marshal(pip)
+	klog.Infof("TEMP publicip: '%s'", string(bytes))
+
 	err = az.CreateOrUpdatePIP(service, pipResourceGroup, pip)
 	if err != nil {
 		klog.V(2).Infof("ensure(%s) abort backoff: pip(%s)", serviceName, *pip.Name)
@@ -972,6 +978,11 @@ func (az *Cloud) reconcileLoadBalancer(clusterName string, service *v1.Service, 
 			}
 		} else {
 			klog.V(2).Infof("reconcileLoadBalancer: reconcileLoadBalancer for service(%s): lb(%s) - updating", serviceName, lbName)
+
+			// TODO: Remove
+			bytes, _ := json.Marshal(lb)
+			klog.Infof("TEMP lb 984: '%s'", string(bytes))
+
 			err := az.CreateOrUpdateLB(service, *lb)
 			if err != nil {
 				klog.V(2).Infof("reconcileLoadBalancer for service(%s) abort backoff: lb(%s) - updating", serviceName, lbName)

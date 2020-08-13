@@ -19,6 +19,7 @@ limitations under the License.
 package azure
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -341,6 +342,9 @@ func NewCloudWithoutFeatureGates(configReader io.Reader) (*Cloud, error) {
 // InitializeCloudFromConfig initializes the Cloud from config.
 func (az *Cloud) InitializeCloudFromConfig(config *Config, fromSecret bool) error {
 	// cloud-config not set, return nil so that it would be initialized from secret.
+	bytes, _ := json.Marshal(config)
+	klog.Infof("TEMP CloudConfig: '%s'", string(bytes))
+
 	if config == nil {
 		klog.Warning("cloud-config is not provided, Azure cloud provider would be initialized from secret")
 		return nil
@@ -604,7 +608,7 @@ func (az *Cloud) configAzureClients(
 
 func (az *Cloud) getAzureClientConfig(servicePrincipalToken *adal.ServicePrincipalToken) *azclients.ClientConfig {
 	azClientConfig := &azclients.ClientConfig{
-		Location: az.Config.Location,
+		Location:                az.Config.Location,
 		SubscriptionID:          az.Config.SubscriptionID,
 		ResourceManagerEndpoint: az.Environment.ResourceManagerEndpoint,
 		Authorizer:              autorest.NewBearerAuthorizer(servicePrincipalToken),
