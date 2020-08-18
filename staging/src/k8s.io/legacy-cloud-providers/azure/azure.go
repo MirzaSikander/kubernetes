@@ -343,7 +343,7 @@ func NewCloudWithoutFeatureGates(configReader io.Reader) (*Cloud, error) {
 func (az *Cloud) InitializeCloudFromConfig(config *Config, fromSecret bool) error {
 	// cloud-config not set, return nil so that it would be initialized from secret.
 	bytes, _ := json.Marshal(config)
-	klog.Infof("TEMP CloudConfig: '%s'", string(bytes))
+	klog.V(2).Infof("TEMP CloudConfig: '%s'", string(bytes))
 
 	if config == nil {
 		klog.Warning("cloud-config is not provided, Azure cloud provider would be initialized from secret")
