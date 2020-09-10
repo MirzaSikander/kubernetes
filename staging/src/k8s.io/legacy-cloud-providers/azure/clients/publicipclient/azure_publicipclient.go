@@ -20,6 +20,7 @@ package publicipclient
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -277,7 +278,7 @@ func (c *Client) listPublicIPAddress(ctx context.Context, resourceGroupName stri
 }
 
 // CreateOrUpdate creates or updates a PublicIPAddress.
-func (c *Client) CreateOrUpdate(ctx context.Context, resourceGroupName string, publicIPAddressName string, parameters network.PublicIPAddress) *retry.Error {
+func (c *Client) CreateOrUpdate(ctx context.Context, resourceGroupName string, publicIPAddressName string, parameters network.PublicIPAddress, extendedLocation *azclients.ExtendedLocation) *retry.Error {
 	mc := metrics.NewMetricContext("public_ip_addresses", "create_or_update", resourceGroupName, c.subscriptionID, "")
 
 	// Report errors if the client is rate limited.
@@ -293,7 +294,7 @@ func (c *Client) CreateOrUpdate(ctx context.Context, resourceGroupName string, p
 		return rerr
 	}
 
-	rerr := c.createOrUpdatePublicIP(ctx, resourceGroupName, publicIPAddressName, parameters)
+	rerr := c.createOrUpdatePublicIP(ctx, resourceGroupName, publicIPAddressName, parameters, extendedLocation)
 	mc.Observe(rerr.Error())
 	if rerr != nil {
 		if rerr.IsThrottled() {
@@ -308,7 +309,7 @@ func (c *Client) CreateOrUpdate(ctx context.Context, resourceGroupName string, p
 }
 
 // createOrUpdatePublicIP creates or updates a PublicIPAddress.
-func (c *Client) createOrUpdatePublicIP(ctx context.Context, resourceGroupName string, publicIPAddressName string, parameters network.PublicIPAddress) *retry.Error {
+func (c *Client) createOrUpdatePublicIP(ctx context.Context, resourceGroupName string, publicIPAddressName string, parameters network.PublicIPAddress, extendedLocation *azclients.ExtendedLocation) *retry.Error {
 	resourceID := armclient.GetResourceID(
 		c.subscriptionID,
 		resourceGroupName,
@@ -316,7 +317,21 @@ func (c *Client) createOrUpdatePublicIP(ctx context.Context, resourceGroupName s
 		publicIPAddressName,
 	)
 
-	response, rerr := c.armClient.PutResource(ctx, resourceID, parameters)
+	var (
+		response *http.Response
+		rerr     *retry.Error
+	)
+
+	if extendedLocation == nil {
+		response, rerr = c.armClient.PutResource(ctx, resourceID, parameters)
+	} else {
+		var propertiesMap map[string]interface{}
+		bytes, _ := json.Marshal(parameters)
+		json.Unmarshal(bytes, &propertiesMap)
+		propertiesMap["extendedLocation"] = extendedLocation
+		response, rerr = c.armClient.PutResource(ctx, resourceID, propertiesMap)
+	}
+
 	defer c.armClient.CloseResponse(ctx, response)
 	if rerr != nil {
 		klog.V(5).Infof("Received error in %s: resourceID: %s, error: %s", "publicip.put.request", resourceID, rerr.Error())

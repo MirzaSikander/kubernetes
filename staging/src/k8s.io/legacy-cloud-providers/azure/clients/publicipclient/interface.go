@@ -22,6 +22,7 @@ import (
 	"context"
 
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-06-01/network"
+	"k8s.io/legacy-cloud-providers/azure/clients"
 	"k8s.io/legacy-cloud-providers/azure/retry"
 )
 
@@ -47,7 +48,7 @@ type Interface interface {
 	List(ctx context.Context, resourceGroupName string) (result []network.PublicIPAddress, rerr *retry.Error)
 
 	// CreateOrUpdate creates or updates a PublicIPAddress.
-	CreateOrUpdate(ctx context.Context, resourceGroupName string, publicIPAddressName string, parameters network.PublicIPAddress) *retry.Error
+	CreateOrUpdate(ctx context.Context, resourceGroupName string, publicIPAddressName string, parameters network.PublicIPAddress, extendedLocation *clients.ExtendedLocation) *retry.Error
 
 	// Delete deletes a PublicIPAddress by name.
 	Delete(ctx context.Context, resourceGroupName string, publicIPAddressName string) *retry.Error

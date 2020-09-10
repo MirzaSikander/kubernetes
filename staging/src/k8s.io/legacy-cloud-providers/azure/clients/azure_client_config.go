@@ -24,6 +24,13 @@ import (
 	"k8s.io/legacy-cloud-providers/azure/retry"
 )
 
+// ExtendedLocation contains info for targeting a specific site within a region.
+// TODO: Remove when switching to official release
+type ExtendedLocation struct {
+	Type *string `json:"type,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
 // ClientConfig contains all essential information to create an Azure client.
 type ClientConfig struct {
 	Location                string

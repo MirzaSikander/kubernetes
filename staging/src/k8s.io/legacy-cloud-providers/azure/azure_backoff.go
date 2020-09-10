@@ -33,6 +33,7 @@ import (
 	cloudprovider "k8s.io/cloud-provider"
 	"k8s.io/klog/v2"
 	azcache "k8s.io/legacy-cloud-providers/azure/cache"
+	"k8s.io/legacy-cloud-providers/azure/clients"
 	"k8s.io/legacy-cloud-providers/azure/retry"
 )
 
@@ -238,8 +239,14 @@ func (az *Cloud) ListPIP(service *v1.Service, pipResourceGroup string) ([]networ
 func (az *Cloud) CreateOrUpdatePIP(service *v1.Service, pipResourceGroup string, pip network.PublicIPAddress) error {
 	ctx, cancel := getContextWithCancel()
 	defer cancel()
-
-	rerr := az.PublicIPAddressesClient.CreateOrUpdate(ctx, pipResourceGroup, *pip.Name, pip)
+	var extendedLocation *clients.ExtendedLocation = nil
+	if az.HasExtendedLocation() {
+		extendedLocation = &clients.ExtendedLocation{
+			Name: to.StringPtr(az.Config.ExtendedLocationName),
+			Type: to.StringPtr(az.Config.ExtendedLocationType),
+		}
+	}
+	rerr := az.PublicIPAddressesClient.CreateOrUpdate(ctx, pipResourceGroup, *pip.Name, pip, extendedLocation)
 	klog.V(10).Infof("PublicIPAddressesClient.CreateOrUpdate(%s, %s): end", pipResourceGroup, *pip.Name)
 	if rerr != nil {
 		klog.Errorf("PublicIPAddressesClient.CreateOrUpdate(%s, %s) failed: %s", pipResourceGroup, *pip.Name, rerr.Error().Error())
