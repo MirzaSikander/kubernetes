@@ -20,12 +20,13 @@ package network
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/date"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/Azure/go-autorest/tracing"
-	"net/http"
 )
 
 // The package's fully qualified name.
@@ -18471,6 +18472,8 @@ type LoadBalancer struct {
 	Type *string `json:"type,omitempty"`
 	// Location - Resource location.
 	Location *string `json:"location,omitempty"`
+	// TODO: Remove when switching to official release
+	ExtendedLocation *ExtendedLocation `json:"extendedLocation,omitempty"`
 	// Tags - Resource tags.
 	Tags map[string]*string `json:"tags"`
 }
@@ -23941,6 +23944,8 @@ type PublicIPAddress struct {
 	Type *string `json:"type,omitempty"`
 	// Location - Resource location.
 	Location *string `json:"location,omitempty"`
+	// TODO: Remove when switching to official release
+	ExtendedLocation *ExtendedLocation `json:"extendedLocation,omitempty"`
 	// Tags - Resource tags.
 	Tags map[string]*string `json:"tags"`
 }
@@ -28878,6 +28883,13 @@ func (future *VirtualHubsUpdateTagsFuture) Result(client VirtualHubsClient) (vh 
 	return
 }
 
+// ExtendedLocation contains info for targeting a specific site within a region.
+// TODO: Remove when switching to official release
+type ExtendedLocation struct {
+	Name *string `json:"name"`
+	Type *string `json:"type"`
+}
+
 // VirtualNetwork virtual Network resource.
 type VirtualNetwork struct {
 	autorest.Response `json:"-"`
@@ -28893,6 +28905,8 @@ type VirtualNetwork struct {
 	Type *string `json:"type,omitempty"`
 	// Location - Resource location.
 	Location *string `json:"location,omitempty"`
+	// TODO: Remove when switching to official release
+	ExtendedLocation *ExtendedLocation `json:"extendedLocation,omitempty"`
 	// Tags - Resource tags.
 	Tags map[string]*string `json:"tags"`
 }

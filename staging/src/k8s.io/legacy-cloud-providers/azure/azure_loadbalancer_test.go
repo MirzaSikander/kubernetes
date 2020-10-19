@@ -1227,8 +1227,12 @@ func TestGetServiceLoadBalancer(t *testing.T) {
 			desc:    "getServiceLoadBalancer shall create a new lb otherwise",
 			service: getTestService("service1", v1.ProtocolTCP, nil, false, 80),
 			expectedLB: &network.LoadBalancer{
-				Name:                         to.StringPtr("testCluster"),
-				Location:                     to.StringPtr("westus"),
+				Name:     to.StringPtr("testCluster"),
+				Location: to.StringPtr("westus"),
+				ExtendedLocation: &network.ExtendedLocation{
+					Name: to.StringPtr("losangeles"),
+					Type: to.StringPtr("edgeZone"),
+				},
 				LoadBalancerPropertiesFormat: &network.LoadBalancerPropertiesFormat{},
 			},
 			expectedExists: false,
@@ -2921,9 +2925,19 @@ func TestEnsurePublicIPExists(t *testing.T) {
 			},
 		},
 		{
-			desc: "ensurePublicIPExists shall create a new pip if there is no existed pip",
+			desc: "ensurePublicIPExists shall create a new pip if it does not already exist",
 			expectedID: "/subscriptions/subscription/resourceGroups/rg/providers/" +
 				"Microsoft.Network/publicIPAddresses/pip1",
+			existingPIPs: []network.PublicIPAddress{{
+				Name: to.StringPtr("pip1"),
+				ID: to.StringPtr("/subscriptions/subscription/resourceGroups/rg" +
+					"/providers/Microsoft.Network/publicIPAddresses/pip1"),
+				Location: to.StringPtr("westus"),
+				ExtendedLocation: &network.ExtendedLocation{
+					Name: to.StringPtr("losangeles"),
+					Type: to.StringPtr("edgeZone"),
+				}},
+			},
 		},
 		{
 			desc:                    "ensurePublicIPExists shall update existed PIP's dns label",

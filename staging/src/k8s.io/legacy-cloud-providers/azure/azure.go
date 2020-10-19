@@ -126,6 +126,10 @@ type Config struct {
 	ResourceGroup string `json:"resourceGroup,omitempty" yaml:"resourceGroup,omitempty"`
 	// The location of the resource group that the cluster is deployed in
 	Location string `json:"location,omitempty" yaml:"location,omitempty"`
+	// The name of site where the cluster will be deployed to that is more granular than the region sepecified by the "location" field.
+	ExtendedLocationName string `json:"extendedLocationName,omitempty" yaml:"extendedLocationName,omitempty"`
+	// The type of site that is being targeted.
+	ExtendedLocationType string `json:"extendedLocationType,omitempty" yaml:"extendedLocationType,omitempty"`
 	// The name of the VNet that the cluster is deployed in
 	VnetName string `json:"vnetName,omitempty" yaml:"vnetName,omitempty"`
 	// The name of the resource group that the Vnet is deployed in
@@ -216,6 +220,11 @@ type Config struct {
 
 	// DisableAvailabilitySetNodes disables VMAS nodes support when "VMType" is set to "vmss".
 	DisableAvailabilitySetNodes bool `json:"disableAvailabilitySetNodes,omitempty" yaml:"disableAvailabilitySetNodes,omitempty"`
+}
+
+// HasExtendedLocation returns true if extendedlocation prop are specified.
+func (config *Config) HasExtendedLocation() bool {
+	return config.ExtendedLocationName != "" && config.ExtendedLocationType != ""
 }
 
 var _ cloudprovider.Interface = (*Cloud)(nil)
@@ -603,7 +612,7 @@ func (az *Cloud) configAzureClients(
 
 func (az *Cloud) getAzureClientConfig(servicePrincipalToken *adal.ServicePrincipalToken) *azclients.ClientConfig {
 	azClientConfig := &azclients.ClientConfig{
-		Location:                az.Config.Location,
+		Location: az.Config.Location,
 		SubscriptionID:          az.Config.SubscriptionID,
 		ResourceManagerEndpoint: az.Environment.ResourceManagerEndpoint,
 		Authorizer:              autorest.NewBearerAuthorizer(servicePrincipalToken),

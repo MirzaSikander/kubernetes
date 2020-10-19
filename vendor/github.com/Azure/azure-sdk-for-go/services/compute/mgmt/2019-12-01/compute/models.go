@@ -20,12 +20,13 @@ package compute
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/date"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/Azure/go-autorest/tracing"
-	"net/http"
 )
 
 // The package's fully qualified name.
@@ -10622,6 +10623,13 @@ type VirtualMachineReimageParameters struct {
 	TempDisk *bool `json:"tempDisk,omitempty"`
 }
 
+// ExtendedLocation contains info for targeting a specific site within a region.
+// TODO: Remove when switching to official release
+type ExtendedLocation struct {
+	Type *string `json:"type,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
 // VirtualMachineScaleSet describes a Virtual Machine Scale Set.
 type VirtualMachineScaleSet struct {
 	autorest.Response `json:"-"`
@@ -10642,6 +10650,8 @@ type VirtualMachineScaleSet struct {
 	Type *string `json:"type,omitempty"`
 	// Location - Resource location
 	Location *string `json:"location,omitempty"`
+	// TODO: Remove when switching to official release
+	ExtendedLocation *ExtendedLocation `json:"extendedLocation,omitempty"`
 	// Tags - Resource tags
 	Tags map[string]*string `json:"tags"`
 }
